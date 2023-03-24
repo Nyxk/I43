@@ -1,0 +1,103 @@
+
+###EGCD
+def egcd(a,n):
+    u,v=1,0
+    u1,v1=0,1
+    c=n
+    while n!=0:
+        q=a//n
+        w1=u-u1*q
+        w2=v-v1*q
+        u,v=u1,v1
+        u1,v1=w1,w2
+        a,n=n,a%n
+    return [a, u % c, v]
+
+
+###Exo1
+def gen_cle(n):
+    res = []
+    for i in range(2, n):
+        a = egcd(i, n)
+        if a[0] == 1:
+            for j in range(0, n):
+                res += [[i, j, a[1]]]
+    return res,len(res)
+
+
+###Exo3
+def cryptanalyse(fic):
+    cryptogramme=open(fic,'r')
+    dica = {26: ",", 27: "'", 28: "."}
+    dico = {",": 26, "'": 27, ".": 28}
+    for y in range(97, 123):
+        dico[chr(y)] = y - 97
+    for y in range(97, 123):
+        dica[y - 97] = chr(y)
+    nop=""
+    max=""
+    max2=""
+    for lig in cryptogramme:
+        for cin in lig:
+            if cin in dico:
+                nop+=cin
+    freq={}
+    for car in nop:
+        if car not in freq:
+            freq[car]=1
+            if (len(freq)==1):
+                max=car
+        else:
+            freq[car]+=1
+            if freq[car] > freq[max]:
+                max=car
+    carac={}
+    x=0
+    muno=0
+    while x < len(nop)-1:
+        if nop[x]==max and nop[x+1] not in carac:
+            carac[nop[x+1]]=1
+            if len(carac)==1:
+                max2=nop[x+1]
+            muno+=1
+        elif nop[x]==max and nop[x+1] in carac:
+            carac[nop[x+1]]+=1
+            if carac[nop[x+1]] > carac[max2]:
+                max2=nop[x+1]
+            muno+=1
+        x+=1
+    bigramme=max+max2
+    dicx = {",": 26, "'": 27, ".": 28}
+    for y in range(97, 123):
+        dicx[chr(y)] = y - 97
+    a=[dicx[bigramme[0]],dicx[bigramme[1]]]
+    x=egcd(14,29)
+    z=((a[1]-a[0])*x[1])%29
+    de=(a[0]-4*z)%29
+    invi=egcd(z,29)[1]
+    res=""
+    for i in nop:
+        calc = ((dico[i]-de)*invi) % 29
+        res += dica[calc]
+    return [z,de,invi],res
+
+
+###Exo4
+def chiffre(fic, cle):
+    cryptogramme = open(fic, 'r')
+    sip=""
+    dica = {26: ",", 27: "'", 28: "."}
+    dico = {",": 26, "'": 27, ".": 28}
+    for y in range(97, 123):
+        dico[chr(y)] = y - 97
+    for y in range(97, 123):
+        dica[y - 97] = chr(y)
+    nop = ""
+    for lig in cryptogramme:
+        for cin in lig:
+            if cin in dico:
+                nop += cin
+    for i in nop:
+        calc=(dico[i]*cle[0]+cle[1])%29
+        sip+=dica[calc]
+    return sip
